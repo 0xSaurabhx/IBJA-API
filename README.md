@@ -7,6 +7,7 @@ A simple API to fetch gold rates from the Indian Bullion & Jewellers Association
 - 🏆 Get latest gold rates for different purities
 - 🥈 Get latest silver rates (999 purity) - uses most recent historical data when live rates unavailable
 - 📊 Fetch historical gold rate data (AM & PM sessions)
+- ⏱️ Check API uptime and status
 - ⚡ Fast response with caching (2 hours)
 - 🚀 Deployed on Vercel for high availability
 
@@ -25,6 +26,7 @@ Returns API information and available endpoints.
   "endpoint1": "/latest",
   "endpoint2": "/history",
   "endpoint3": "/silver",
+  "endpoint4": "/uptime",
   "description": "Fetches IBJA gold rates in India"
 }
 ```
@@ -100,6 +102,22 @@ Fetches historical gold rates data for both AM and PM trading sessions.
       "silver_999": "95.50"
     }
   ]
+}
+```
+
+### 5. Uptime Status
+```
+GET /uptime
+```
+Returns the API uptime status and current timestamp.
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "timestamp": "2025-10-20T10:30:00.000Z",
+  "uptime": 123.45,
+  "message": "IBJA API is running"
 }
 ```
 

@@ -23,6 +23,7 @@ module.exports = async (req, res) => {
       endpoint1: '/latest',
       endpoint2: '/history',
       endpoint3: '/silver',
+      endpoint4: '/uptime',
       description: 'Fetches IBJA gold rates in India'
     });
     return;
