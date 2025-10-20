@@ -7,6 +7,7 @@ A simple API to fetch gold rates from the Indian Bullion & Jewellers Association
 - 🏆 Get latest gold rates for different purities
 - 🥈 Get latest silver rates (999 purity) - uses most recent historical data when live rates unavailable
 - 📊 Fetch historical gold rate data (AM & PM sessions)
+- 💱 Multi-currency support with live exchange rates
 - ⏱️ Check API uptime and status
 - ⚡ Fast response with caching (2 hours)
 - 🚀 Deployed on Vercel for high availability
@@ -27,6 +28,7 @@ Returns API information and available endpoints.
   "endpoint2": "/history",
   "endpoint3": "/silver",
   "endpoint4": "/uptime",
+  "endpoint5": "/convert",
   "description": "Fetches IBJA gold rates in India"
 }
 ```
@@ -105,7 +107,30 @@ Fetches historical gold rates data for both AM and PM trading sessions.
 }
 ```
 
-### 5. Uptime Status
+### 5. Currency Converter
+```
+GET /convert?from=INR&to=USD&amount=1000
+```
+Converts currency amounts using live exchange rates.
+
+**Parameters:**
+- `from` (optional): Source currency (default: INR)
+- `to` (required): Target currency (e.g., USD, EUR, GBP)
+- `amount` (optional): Amount to convert (default: 1)
+
+**Response:**
+```json
+{
+  "from": "INR",
+  "to": "USD",
+  "amount": 1000,
+  "convertedAmount": 11.85,
+  "rate": 0.01185,
+  "lastUpdated": "2025-10-20T10:30:00.000Z"
+}
+```
+
+### 6. Uptime Status
 ```
 GET /uptime
 ```
@@ -167,11 +192,54 @@ To deploy:
 vercel --prod
 ```
 
-## Rate Limiting & Caching
+## Currency Converter
 
-- API responses are cached for 2 hours (`s-maxage=7200`)
-- Uses `stale-while-revalidate` for the latest endpoint
-- Recommended to not exceed reasonable request limits
+The API includes a powerful currency converter that uses live exchange rates to convert between different currencies. This is particularly useful for international users who want to understand gold and silver rates in their local currency.
+
+### Supported Currencies
+
+The converter supports 160+ currencies including:
+- **Major currencies**: USD, EUR, GBP, JPY, AUD, CAD, CHF, CNY
+- **Regional currencies**: INR (Indian Rupee), AED, SAR, SGD, HKD, etc.
+- **Cryptocurrencies**: BTC, ETH (limited support)
+
+### Usage Examples
+
+```bash
+# Convert 1000 INR to USD
+GET /convert?from=INR&to=USD&amount=1000
+
+# Convert 1 USD to EUR (default amount is 1)
+GET /convert?to=EUR
+
+# Convert 5000 INR to GBP
+GET /convert?from=INR&to=GBP&amount=5000
+```
+
+### Integration with Gold Rates
+
+You can combine the currency converter with gold rates:
+
+```javascript
+// Get gold rate in INR
+const goldResponse = await fetch('/latest');
+const goldData = await goldResponse.json();
+
+// Convert 10 grams of 999 gold to USD
+const goldRateINR = parseFloat(goldData.lblGold999_AM);
+const totalValueINR = goldRateINR * 10; // 10 grams
+
+const usdResponse = await fetch(`/convert?from=INR&to=USD&amount=${totalValueINR}`);
+const usdData = await usdResponse.json();
+
+console.log(`10g of 999 gold costs: $${usdData.convertedAmount}`);
+```
+
+### Exchange Rate Updates
+
+- Exchange rates are cached for 1 hour to ensure fast responses
+- Rates are sourced from reliable forex APIs
+- Automatic fallback to cached rates if the API is temporarily unavailable
 
 ## Error Handling
 
