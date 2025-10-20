@@ -22,6 +22,7 @@ module.exports = async (req, res) => {
       message: 'Welcome to the IBJA Gold API',
       endpoint1: '/latest',
       endpoint2: '/history',
+      endpoint3: '/silver',
       description: 'Fetches IBJA gold rates in India'
     });
     return;
