@@ -4,7 +4,8 @@
     { "src": "api/index.js", "use": "@vercel/node" },
     { "src": "api/history.js", "use": "@vercel/node" },
     { "src": "api/silver.js", "use": "@vercel/node" },
-    { "src": "api/uptime.js", "use": "@vercel/node" }
+    { "src": "api/uptime.js", "use": "@vercel/node" },
+    { "src": "api/convert.js", "use": "@vercel/node" }
   ],
   "routes": [
     { "src": "/latest", "dest": "api/index.js" },
@@ -12,6 +13,7 @@
     { "src": "/history", "dest": "api/history.js" },
     { "src": "/silver", "dest": "api/silver.js" },
     { "src": "/silver/latest", "dest": "api/silver.js" },
-    { "src": "/uptime", "dest": "api/uptime.js" }
+    { "src": "/uptime", "dest": "api/uptime.js" },
+    { "src": "/convert", "dest": "api/convert.js" }
   ]
 }
