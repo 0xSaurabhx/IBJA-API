@@ -4,14 +4,16 @@ A simple API to fetch gold rates from the Indian Bullion & Jewellers Association
 
 ## Features
 
-- 🏆 Get latest gold rates for different purities
-- 🥈 Get latest silver rates (999 purity) - uses most recent historical data when live rates unavailable
-- 🥉 Get latest platinum rates (999 purity)
-- 📊 Fetch historical gold rate data (AM & PM sessions)
-- 💱 Multi-currency support with live exchange rates
-- ⏱️ Check API uptime and status
-- ⚡ Fast response with caching (2 hours)
-- 🚀 Deployed on Vercel for high availability
+- ✅ **Gold Rates**: Real-time gold rates for multiple purities (999, 995, 916, 750, 585)
+- ✅ **Silver Rates**: Live silver rates with historical data fallback
+- ✅ **Platinum Rates**: Current platinum rates for 999 purity
+- ✅ **Historical Data**: AM/PM trading session data with comprehensive rate history
+- ✅ **Multi-Currency Support**: Convert rates to USD, EUR, GBP, and other currencies using live exchange rates
+- ✅ **PDF Downloads**: Direct download links for last 30 days historical data
+- ✅ **Uptime Monitoring**: API health check endpoint
+- ✅ **Serverless Deployment**: Hosted on Vercel for high availability
+- ✅ **Caching**: Optimized response times with intelligent caching (2 hours for rates, 1 hour for exchange rates)
+- ✅ **Error Handling**: Robust error handling with meaningful error messages
 
 ## API Endpoints
 
@@ -31,6 +33,7 @@ Returns API information and available endpoints.
   "endpoint4": "/uptime",
   "endpoint5": "/convert",
   "endpoint6": "/platinum",
+  "endpoint7": "/pdf",
   "description": "Fetches IBJA gold rates in India"
 }
 ```
@@ -148,7 +151,28 @@ Converts currency amounts using live exchange rates.
 }
 ```
 
-### 7. Uptime Status
+### 7. PDF Downloads
+```
+GET /pdf
+GET /pdf/last30
+```
+Returns download links for historical data PDFs.
+
+**Response:**
+```json
+{
+  "title": "Previous 30 Days",
+  "description": "Daily Opening and Closing Market Rate PDF",
+  "downloadUrl": "https://www.ibjarates.com/UploadedFiles/30DaysPdf/Pdf_9827_20251022131909930_Daily Opening and Closing Market Rate.pdf",
+  "directLink": "https://www.ibjarates.com/UploadedFiles/30DaysPdf/Pdf_9827_20251022131909930_Daily Opening and Closing Market Rate.pdf",
+  "fileType": "PDF",
+  "period": "Last 30 Days",
+  "lastUpdated": "2025-10-22T10:30:00.000Z",
+  "source": "IBJA Rates"
+}
+```
+
+### 8. Uptime Status
 ```
 GET /uptime
 ```
@@ -164,11 +188,33 @@ Returns the API uptime status and current timestamp.
 }
 ```
 
+## Precious Metals Supported
+
+This API provides rates for three major precious metals:
+
+### 🏆 Gold (Au)
+- **Purities**: 999, 995, 916, 750, 585
+- **Trading Sessions**: AM (Morning) & PM (Evening)
+- **Rate Format**: Per 10 grams
+- **Endpoint**: `/latest`
+
+### 🥈 Silver (Ag)
+- **Purity**: 999 (99.9% pure)
+- **Trading Sessions**: AM (Morning) & PM (Evening)
+- **Rate Format**: Per 1 kg
+- **Endpoint**: `/silver/latest`
+
+### 🥉 Platinum (Pt)
+- **Purity**: 999 (99.9% pure)
+- **Trading Sessions**: Single daily rate
+- **Rate Format**: Per gram
+- **Endpoint**: `/platinum/latest`
+
 ## Gold Purity Types
 
 - **999**: 24 Karat (99.9% pure gold)
 - **995**: 24 Karat (99.5% pure gold)
-- **916**: 22 Karat (91.6% pure gold)
+- **916**: 22 Karat (91.6% pure gold) - Most common in jewelry
 - **750**: 18 Karat (75.0% pure gold)
 - **585**: 14 Karat (58.5% pure gold)
 
