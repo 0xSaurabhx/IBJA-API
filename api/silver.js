@@ -1,10 +1,64 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
+const { generalLimiter, applyRateLimit } = require('./_rateLimiter'); // Import rate limiter
 
+// Core logic for fetching silver rates
+const handleSilverRequest = async (req, res) => {
+  try {
+    const { data } = await axios.get('https://www.ibjarates.com');
+    const $ = cheerio.load(data);
+
+    // Try finding specific silver labels first
+    let silverAM = $(`#lblSilver999_AM`).text().trim() || null;
+    let silverPM = $(`#lblSilver999_PM`).text().trim() || null;
+
+    // Fallback: If labels aren't present/updated, parse from history table
+    if (!silverAM && !silverPM) {
+        console.log("Silver labels not found, parsing from history table...");
+        const parseTable = (tabId) => {
+          const rows = $(`${tabId} table tbody tr`);
+          // Find the first row with a valid silver rate
+          for (let i = 0; i < rows.length; i++) {
+            const cells = $(rows[i]).find('td');
+            if (cells.length === 7) {
+              const silverRate = $(cells[6]).text().trim();
+              if (silverRate) return silverRate;
+            }
+          }
+          return null; // Return null if no valid rate found
+        };
+
+        silverAM = parseTable('#tab-am');
+        silverPM = parseTable('#tab-pm');
+    }
+
+    if (!silverAM && !silverPM) {
+        console.warn('No silver rates found via labels or history table.');
+        return res.status(404).json({ error: 'Silver rates not available currently.' });
+    }
+
+    const now = new Date();
+
+    // Cache header
+    res.setHeader('Cache-Control', 's-maxage=7200, stale-while-revalidate'); // 2 hours
+    res.status(200).json({
+      date: now.toISOString().split('T')[0],
+      lblSilver999_AM: silverAM,
+      lblSilver999_PM: silverPM || silverAM // Fallback PM to AM if PM is missing
+    });
+
+  } catch (error) {
+    console.error('Error scraping silver rates:', error.message);
+    res.status(500).json({ error: 'Failed to fetch silver rates' });
+  }
+};
+
+// Main export - router and middleware application
 module.exports = async (req, res) => {
-  // Handle root endpoint for /silver
-  if (req.url === '/' || req.url === '' || req.url === '/silver') {
-    // ✅ Root route response with cache header
+  const urlPath = req.url.split('?')[0];
+
+  if (urlPath === '/' || urlPath === '' || urlPath === '/silver') {
+    // Root route for silver - no rate limit
     res.setHeader('Cache-Control', 's-maxage=7200, stale-while-revalidate');
     res.status(200).json({
       message: 'Welcome to the IBJA Silver API',
@@ -14,61 +68,12 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // Handle any other request as latest endpoint
-  try {
-    const { data } = await axios.get('https://www.ibjarates.com');
-    const $ = cheerio.load(data);
-
-    const parseTable = (tabId) => {
-      const rows = $(`${tabId} table tbody tr`);
-      const history = [];
-
-      rows.each((_, row) => {
-        const cells = $(row).find('td');
-        if (cells.length === 7) {
-          history.push({
-            date: $(cells[0]).text().trim().replace(/\n/g, ''),
-            gold_999: $(cells[1]).text().trim(),
-            gold_995: $(cells[2]).text().trim(),
-            gold_916: $(cells[3]).text().trim(),
-            gold_750: $(cells[4]).text().trim(),
-            gold_585: $(cells[5]).text().trim(),
-            silver_999: $(cells[6]).text().trim()
-          });
-        }
-      });
-
-      return history;
-    };
-
-    const am = parseTable('#tab-am');
-    const pm = parseTable('#tab-pm');
-
-    // Get the latest silver rates (first entry from AM and PM)
-    const latestAM = am.length > 0 ? am[0] : null;
-    const latestPM = pm.length > 0 ? pm[0] : null;
-
-    const result = {};
-
-    if (latestAM) {
-      result.lblSilver999_AM = latestAM.silver_999;
-    }
-
-    if (latestPM) {
-      result.lblSilver999_PM = latestPM.silver_999;
-    }
-
-    const now = new Date();
-
-    // ✅ Add 2-hour cache header
-    res.setHeader('Cache-Control', 's-maxage=7200, stale-while-revalidate');
-    res.status(200).json({
-      date: now.toISOString().split('T')[0],
-      ...result
-    });
-
-  } catch (error) {
-    console.error('Error scraping silver rates:', error.message);
-    res.status(500).json({ error: 'Failed to fetch silver rates' });
+  // Assume any other path under /silver is /latest
+  if (urlPath.includes('/latest') || urlPath === '/silver/latest') {
+     applyRateLimit(generalLimiter)(req, res, () => handleSilverRequest(req, res));
+     return;
   }
+
+  // Fallback
+  res.status(404).json({ error: 'Endpoint not found' });
 };
