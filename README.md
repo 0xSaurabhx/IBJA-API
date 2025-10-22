@@ -6,6 +6,7 @@ A simple API to fetch gold rates from the Indian Bullion & Jewellers Association
 
 - 🏆 Get latest gold rates for different purities
 - 🥈 Get latest silver rates (999 purity) - uses most recent historical data when live rates unavailable
+- 🥉 Get latest platinum rates (999 purity)
 - 📊 Fetch historical gold rate data (AM & PM sessions)
 - 💱 Multi-currency support with live exchange rates
 - ⏱️ Check API uptime and status
@@ -29,6 +30,7 @@ Returns API information and available endpoints.
   "endpoint3": "/silver",
   "endpoint4": "/uptime",
   "endpoint5": "/convert",
+  "endpoint6": "/platinum",
   "description": "Fetches IBJA gold rates in India"
 }
 ```
@@ -72,7 +74,23 @@ Fetches the current silver rates for 999 purity in both AM and PM sessions. Retu
 }
 ```
 
-### 4. Historical Rates
+### 4. Latest Platinum Rates
+```
+GET /platinum
+GET /platinum/latest
+```
+Fetches the current platinum rates for 999 purity in both AM and PM sessions.
+
+**Response:**
+```json
+{
+  "date": "2025-08-07",
+  "lblPlatinum999_AM": "3200.00",
+  "lblPlatinum999_PM": "3180.00"
+}
+```
+
+### 5. Historical Rates
 ```
 GET /history
 ```
@@ -107,7 +125,7 @@ Fetches historical gold rates data for both AM and PM trading sessions.
 }
 ```
 
-### 5. Currency Converter
+### 6. Currency Converter
 ```
 GET /convert?from=INR&to=USD&amount=1000
 ```
@@ -130,7 +148,7 @@ Converts currency amounts using live exchange rates.
 }
 ```
 
-### 6. Uptime Status
+### 7. Uptime Status
 ```
 GET /uptime
 ```
