@@ -8,6 +8,7 @@ A simple API to fetch gold rates from the Indian Bullion & Jewellers Association
 - ✅ **Silver Rates**: Live silver rates with historical data fallback
 - ✅ **Platinum Rates**: Current platinum rates for 999 purity
 - ✅ **Historical Data**: AM/PM trading session data with comprehensive rate history
+- ✅ **Chart Data**: Historical comparison between 999 and 916 gold purity rates for visualization
 - ✅ **Multi-Currency Support**: Convert rates to USD, EUR, GBP, and other currencies using live exchange rates
 - ✅ **PDF Downloads**: Direct download links for last 30 days historical data
 - ✅ **Uptime Monitoring**: API health check endpoint
@@ -151,28 +152,42 @@ Converts currency amounts using live exchange rates.
 }
 ```
 
-### 7. PDF Downloads
+### 8. Chart Data Comparison
 ```
-GET /pdf
-GET /pdf/last30
+GET /chart
+GET /chart/comparison
 ```
-Returns download links for historical data PDFs.
+Returns historical chart data comparing 999 and 916 gold purity rates for visualization.
 
 **Response:**
 ```json
 {
-  "title": "Previous 30 Days",
-  "description": "Daily Opening and Closing Market Rate PDF",
-  "downloadUrl": "https://www.ibjarates.com/UploadedFiles/30DaysPdf/Pdf_9827_20251022131909930_Daily Opening and Closing Market Rate.pdf",
-  "directLink": "https://www.ibjarates.com/UploadedFiles/30DaysPdf/Pdf_9827_20251022131909930_Daily Opening and Closing Market Rate.pdf",
-  "fileType": "PDF",
-  "period": "Last 30 Days",
-  "lastUpdated": "2025-10-22T10:30:00.000Z",
-  "source": "IBJA Rates"
+  "title": "Gold Purity Comparison (999 vs 916)",
+  "description": "Historical comparison between 999 and 916 gold purity rates",
+  "lastUpdated": "2025-10-22T11:00:00.000Z",
+  "statistics": {
+    "average_999": 7850.00,
+    "average_916": 7190.00,
+    "average_difference": 660.00,
+    "total_records": 20,
+    "valid_records": 20
+  },
+  "data": [
+    {
+      "date": "22/10/2025",
+      "session": "AM",
+      "gold_999": 7850.00,
+      "gold_916": 7190.00,
+      "difference": 660.00,
+      "purity_ratio": "1.0918"
+    }
+  ],
+  "am": [...],
+  "pm": [...]
 }
 ```
 
-### 8. Uptime Status
+### 9. Uptime Status
 ```
 GET /uptime
 ```
@@ -182,7 +197,7 @@ Returns the API uptime status and current timestamp.
 ```json
 {
   "status": "ok",
-  "timestamp": "2025-10-20T10:30:00.000Z",
+  "timestamp": "2025-10-22T11:00:00.000Z",
   "uptime": 123.45,
   "message": "IBJA API is running"
 }

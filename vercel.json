@@ -7,7 +7,8 @@
     { "src": "api/uptime.js", "use": "@vercel/node" },
     { "src": "api/convert.js", "use": "@vercel/node" },
     { "src": "api/platinum.js", "use": "@vercel/node" },
-    { "src": "api/pdf.js", "use": "@vercel/node" }
+    { "src": "api/pdf.js", "use": "@vercel/node" },
+    { "src": "api/chart.js", "use": "@vercel/node" }
   ],
   "routes": [
     { "src": "/latest", "dest": "api/index.js" },
@@ -20,6 +21,8 @@
     { "src": "/platinum", "dest": "api/platinum.js" },
     { "src": "/platinum/latest", "dest": "api/platinum.js" },
     { "src": "/pdf", "dest": "api/pdf.js" },
-    { "src": "/pdf/last30", "dest": "api/pdf.js" }
+    { "src": "/pdf/last30", "dest": "api/pdf.js" },
+    { "src": "/chart", "dest": "api/chart.js" },
+    { "src": "/chart/comparison", "dest": "api/chart.js" }
   ]
 }
