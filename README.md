@@ -19,12 +19,15 @@ A simple API to fetch gold rates from the Indian Bullion & Jewellers Association
 ## API Endpoints
 
 ### 1. Root Endpoint
+
 ```
 GET /
 ```
+
 Returns API information and available endpoints.
 
 **Response:**
+
 ```json
 {
   "message": "Welcome to the IBJA Gold API",
@@ -40,12 +43,15 @@ Returns API information and available endpoints.
 ```
 
 ### 2. Latest Gold Rates
+
 ```
 GET /latest
 ```
+
 Fetches the current gold rates for different purities in both AM and PM sessions.
 
 **Response:**
+
 ```json
 {
   "date": "2025-08-07",
@@ -63,13 +69,16 @@ Fetches the current gold rates for different purities in both AM and PM sessions
 ```
 
 ### 3. Latest Silver Rates
+
 ```
 GET /silver
 GET /silver/latest
 ```
+
 Fetches the current silver rates for 999 purity in both AM and PM sessions. Returns the most recent historical rates when live rates are not yet available.
 
 **Response:**
+
 ```json
 {
   "date": "2025-08-07",
@@ -79,13 +88,16 @@ Fetches the current silver rates for 999 purity in both AM and PM sessions. Retu
 ```
 
 ### 4. Latest Platinum Rates
+
 ```
 GET /platinum
 GET /platinum/latest
 ```
+
 Fetches the current platinum rates for 999 purity in both AM and PM sessions.
 
 **Response:**
+
 ```json
 {
   "date": "2025-08-07",
@@ -95,12 +107,15 @@ Fetches the current platinum rates for 999 purity in both AM and PM sessions.
 ```
 
 ### 5. Historical Rates
+
 ```
 GET /history
 ```
+
 Fetches historical gold rates data for both AM and PM trading sessions.
 
 **Response:**
+
 ```json
 {
   "updated": "2025-08-07T12:30:00.000Z",
@@ -130,17 +145,21 @@ Fetches historical gold rates data for both AM and PM trading sessions.
 ```
 
 ### 6. Currency Converter
+
 ```
 GET /convert?from=INR&to=USD&amount=1000
 ```
+
 Converts currency amounts using live exchange rates.
 
 **Parameters:**
+
 - `from` (optional): Source currency (default: INR)
 - `to` (required): Target currency (e.g., USD, EUR, GBP)
 - `amount` (optional): Amount to convert (default: 1)
 
 **Response:**
+
 ```json
 {
   "from": "INR",
@@ -153,13 +172,16 @@ Converts currency amounts using live exchange rates.
 ```
 
 ### 8. Chart Data Comparison
+
 ```
 GET /chart
 GET /chart/comparison
 ```
+
 Returns historical chart data comparing 999 and 916 gold purity rates for visualization.
 
 **Response:**
+
 ```json
 {
   "title": "Gold Purity Comparison (999 vs 916)",
@@ -188,12 +210,15 @@ Returns historical chart data comparing 999 and 916 gold purity rates for visual
 ```
 
 ### 9. Uptime Status
+
 ```
 GET /uptime
 ```
+
 Returns the API uptime status and current timestamp.
 
 **Response:**
+
 ```json
 {
   "status": "ok",
@@ -208,18 +233,21 @@ Returns the API uptime status and current timestamp.
 This API provides rates for three major precious metals:
 
 ### 🏆 Gold (Au)
+
 - **Purities**: 999, 995, 916, 750, 585
 - **Trading Sessions**: AM (Morning) & PM (Evening)
 - **Rate Format**: Per 10 grams
 - **Endpoint**: `/latest`
 
 ### 🥈 Silver (Ag)
+
 - **Purity**: 999 (99.9% pure)
 - **Trading Sessions**: AM (Morning) & PM (Evening)
 - **Rate Format**: Per 1 kg
 - **Endpoint**: `/silver/latest`
 
 ### 🥉 Platinum (Pt)
+
 - **Purity**: 999 (99.9% pure)
 - **Trading Sessions**: Single daily rate
 - **Rate Format**: Per gram
@@ -244,29 +272,45 @@ This API provides rates for three major precious metals:
 ## Installation & Local Development
 
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
 cd IBJA-API
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
-3. For local development, you can use Vercel CLI:
+3. For local development with Vercel CLI:
+
 ```bash
 npm install -g vercel
 vercel dev
 ```
 
-4. The API will be available at `http://localhost:3000`
+4. Alternatively, for local development with nodemon (auto-reload on file changes):
+
+```bash
+# Install nodemon globally (if not already installed)
+npm install -g nodemon
+
+# Start the development server with auto-reload
+nodemon server.js 
+or
+npm run dev
+```
+
+5. The API will be available at `http://localhost:3000`
 
 ## Deployment
 
-This project is configured for Vercel deployment using the `vercel.json` configuration file. 
+This project is configured for Vercel deployment using the `vercel.json` configuration file.
 
 To deploy:
+
 ```bash
 vercel --prod
 ```
@@ -278,6 +322,7 @@ The API includes a powerful currency converter that uses live exchange rates to 
 ### Supported Currencies
 
 The converter supports 160+ currencies including:
+
 - **Major currencies**: USD, EUR, GBP, JPY, AUD, CAD, CHF, CNY
 - **Regional currencies**: INR (Indian Rupee), AED, SAR, SGD, HKD, etc.
 - **Cryptocurrencies**: BTC, ETH (limited support)
@@ -301,14 +346,16 @@ You can combine the currency converter with gold rates:
 
 ```javascript
 // Get gold rate in INR
-const goldResponse = await fetch('/latest');
+const goldResponse = await fetch("/latest");
 const goldData = await goldResponse.json();
 
 // Convert 10 grams of 999 gold to USD
 const goldRateINR = parseFloat(goldData.lblGold999_AM);
 const totalValueINR = goldRateINR * 10; // 10 grams
 
-const usdResponse = await fetch(`/convert?from=INR&to=USD&amount=${totalValueINR}`);
+const usdResponse = await fetch(
+  `/convert?from=INR&to=USD&amount=${totalValueINR}`
+);
 const usdData = await usdResponse.json();
 
 console.log(`10g of 999 gold costs: $${usdData.convertedAmount}`);
@@ -323,6 +370,7 @@ console.log(`10g of 999 gold costs: $${usdData.convertedAmount}`);
 ## Error Handling
 
 The API includes proper error handling:
+
 - 404 for unknown endpoints
 - 500 for scraping failures
 - Graceful fallbacks for missing data
