@@ -62,7 +62,7 @@ app.get("/silver/latest", asyncHandler(silverHandler));
 app.get("/uptime", asyncHandler(uptimeHandler));
 
 // 404 handler
-app.use("*", (req, res) => {
+app.use((req, res) => {
   res.status(404).json({
     error: "Endpoint not found",
     availableEndpoints: [
