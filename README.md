@@ -13,9 +13,17 @@ A simple API to fetch gold rates from the Indian Bullion & Jewellers Association
 - ✅ **Multi-Currency Support**: Convert rates to USD, EUR, GBP, and other currencies using live exchange rates
 - ✅ **PDF Downloads**: Direct download links for last 30 days historical data
 - ✅ **Uptime Monitoring**: API health check endpoint
+- ✅ **API Documentation**: Interactive Swagger/OpenAPI documentation
 - ✅ **Serverless Deployment**: Hosted on Vercel for high availability
 - ✅ **Caching**: Optimized response times with intelligent caching (2 hours for rates, 1 hour for exchange rates)
 - ✅ **Error Handling**: Robust error handling with meaningful error messages
+
+## Documentation
+
+🔍 **Interactive API Documentation**: Visit `/api-docs` for comprehensive Swagger documentation with live testing capabilities.
+
+- **Local Development**: http://localhost:3000/api-docs
+- **Production**: https://ibja-api.vercel.app/api-docs
 
 ## API Endpoints
 

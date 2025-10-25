@@ -12,7 +12,6 @@ jest.mock("../../api/_rateLimiter", () => ({
 // Mock RSS Utils
 jest.mock("../../api/_rssUtils", () => ({
   generateRSSFeed: jest.fn().mockReturnValue("<rss>mock feed</rss>"),
-  formatRatesForRSS: jest.fn().mockReturnValue("Gold999 AM: ₹7200"),
   getMonthFilter: jest.fn().mockReturnValue(null),
   filterItemsByMonth: jest.fn().mockImplementation((items) => items),
 }));
@@ -52,6 +51,7 @@ describe("Index API Handler", () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         message: "Welcome to the IBJA Gold API",
+        documentation: "/api-docs",
         endpoint1: "/latest",
         endpoint2: "/latest/rss (RSS Feed with optional ?m=YYYY-MM filter)",
         endpoint3: "/history",

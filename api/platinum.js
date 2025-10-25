@@ -1,12 +1,16 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
-const { generalLimiter, applyRateLimit } = require('./_rateLimiter'); // Import rate limiter
-const { generateRSSFeed, formatRatesForRSS, getMonthFilter, filterItemsByMonth } = require('./_rssUtils');
+const axios = require("axios");
+const cheerio = require("cheerio");
+const { generalLimiter, applyRateLimit } = require("./_rateLimiter"); // Import rate limiter
+const {
+  generateRSSFeed,
+  getMonthFilter,
+  filterItemsByMonth,
+} = require("./_rssUtils");
 
 // Core logic for fetching platinum rates
 const handlePlatinumRequest = async (req, res) => {
- try {
-    const { data } = await axios.get('https://www.ibjarates.com');
+  try {
+    const { data } = await axios.get("https://www.ibjarates.com");
     const $ = cheerio.load(data);
 
     // Find platinum rate from specific ID if available
@@ -14,15 +18,20 @@ const handlePlatinumRequest = async (req, res) => {
 
     // Fallback: Find platinum rate from table structure if ID fails
     if (!platinumRate) {
-        console.log("Platinum label not found, parsing from table...");
-        $('tr').filter((i, elem) => {
+      console.log("Platinum label not found, parsing from table...");
+      $("tr")
+        .filter((i, elem) => {
           // More specific check for the row containing 'Platinum 999'
-          return $(elem).find('td:first-child').text().trim().toUpperCase() === 'PLATINUM 999';
-        }).each((i, elem) => {
-          const cells = $(elem).find('td');
+          return (
+            $(elem).find("td:first-child").text().trim().toUpperCase() ===
+            "PLATINUM 999"
+          );
+        })
+        .each((i, elem) => {
+          const cells = $(elem).find("td");
           // Assuming rate is in the 3rd cell (index 2)
           if (cells.length >= 3) {
-            const rateText = $(cells[2]).text().trim().replace(/,/g, ''); // Remove commas
+            const rateText = $(cells[2]).text().trim().replace(/,/g, ""); // Remove commas
             // Basic validation: check if it looks like a number
             if (rateText && !isNaN(parseFloat(rateText))) {
               platinumRate = rateText;
@@ -33,24 +42,25 @@ const handlePlatinumRequest = async (req, res) => {
     }
 
     if (!platinumRate) {
-        console.warn('No platinum rate found.');
-        return res.status(404).json({ error: 'Platinum rate not available currently.' });
+      console.warn("No platinum rate found.");
+      return res
+        .status(404)
+        .json({ error: "Platinum rate not available currently." });
     }
 
     const now = new Date();
 
     // Cache header
-    res.setHeader('Cache-Control', 's-maxage=7200, stale-while-revalidate'); // 2 hours
+    res.setHeader("Cache-Control", "s-maxage=7200, stale-while-revalidate"); // 2 hours
     res.status(200).json({
-      date: now.toISOString().split('T')[0],
+      date: now.toISOString().split("T")[0],
       // IBJA site often shows one rate; duplicate for AM/PM for consistency
       lblPlatinum999_AM: platinumRate,
-      lblPlatinum999_PM: platinumRate
+      lblPlatinum999_PM: platinumRate,
     });
-
   } catch (error) {
-    console.error('Error scraping platinum rates:', error.message);
-    res.status(500).json({ error: 'Failed to fetch platinum rates' });
+    console.error("Error scraping platinum rates:", error.message);
+    res.status(500).json({ error: "Failed to fetch platinum rates" });
   }
 };
 
@@ -58,121 +68,134 @@ const handlePlatinumRequest = async (req, res) => {
 const handlePlatinumRSSFeed = async (req, res) => {
   try {
     const monthFilter = getMonthFilter(req);
-    
-    // Only provide current rates - no fake historical data
+
+    // Get current platinum rates (platinum doesn't have historical table data like gold/silver)
     const currentRates = await getCurrentPlatinumRates();
-    
+
     if (!currentRates) {
-      return res.status(404).json({ error: 'Platinum rates not available for RSS feed' });
+      return res
+        .status(404)
+        .json({ error: "Platinum rates not available for RSS feed" });
     }
 
-    // Only current rates in RSS
-    const rssItems = [{
-      title: `Platinum Rates - ${currentRates.date}`,
-      description: `Current IBJA Platinum Rates: ${formatRatesForRSS(currentRates, 'platinum')}`,
-      date: currentRates.date
-    }];
+    // Create RSS items with current rates
+    const rssItems = [
+      {
+        title: `Platinum Rates - ${currentRates.date}`,
+        description: `Current IBJA Platinum Rates: 999: ₹${
+          currentRates.lblPlatinum999_AM || "N/A"
+        }`,
+        date: currentRates.date,
+      },
+    ];
 
-    // If month filter is provided and doesn't match current month, return error
-    if (monthFilter) {
-      const currentDate = new Date();
-      const currentMonth = currentDate.getFullYear() + '-' + String(currentDate.getMonth() + 1).padStart(2, '0');
-      const requestedMonth = monthFilter.year + '-' + String(monthFilter.month).padStart(2, '0');
-      
-      if (currentMonth !== requestedMonth) {
-        return res.status(404).json({ 
-          error: `Historical data not available. Only current month (${currentMonth}) data is available.`,
-          availableMonth: currentMonth,
-          requestedMonth: requestedMonth
-        });
-      }
+    // Apply month filter if provided
+    const filteredItems = filterItemsByMonth(rssItems, monthFilter);
+
+    if (filteredItems.length === 0) {
+      return res.status(404).json({
+        error: monthFilter
+          ? `No platinum rate data available for ${monthFilter.monthString}. Current data is only available for this month.`
+          : "No platinum rate data available",
+        note: "Platinum historical data is limited compared to gold and silver",
+      });
     }
-    
-    const baseUrl = `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}`;
+
+    const baseUrl = `${req.headers["x-forwarded-proto"] || "https"}://${
+      req.headers.host
+    }`;
     const rssContent = generateRSSFeed(
-      'IBJA Platinum Rates RSS Feed',
-      'Current platinum rates from India Bullion and Jewellers Association (IBJA)',
-      rssItems,
+      "IBJA Platinum Rates RSS Feed",
+      "Current platinum rates from India Bullion and Jewellers Association (IBJA)",
+      filteredItems,
       baseUrl,
-      '/platinum/latest'
+      "/platinum/latest"
     );
 
-    res.setHeader('Content-Type', 'application/rss+xml; charset=UTF-8');
-    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
+    res.setHeader("Content-Type", "application/rss+xml; charset=UTF-8");
+    res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate");
     res.status(200).send(rssContent);
-
   } catch (error) {
-    console.error('Error generating platinum RSS feed:', error.message);
-    res.status(500).json({ error: 'Failed to generate RSS feed' });
+    console.error("Error generating platinum RSS feed:", error.message);
+    res.status(500).json({ error: "Failed to generate RSS feed" });
   }
 };
 
 // Helper function to get current platinum rates
 const getCurrentPlatinumRates = async () => {
   try {
-    const { data } = await axios.get('https://www.ibjarates.com');
+    const { data } = await axios.get("https://www.ibjarates.com");
     const $ = cheerio.load(data);
 
     let platinumRate = $(`#lblPlatinum999`).text().trim() || null;
 
     // Fallback parsing if needed
     if (!platinumRate) {
-      $('tr').filter((i, elem) => {
-        return $(elem).find('td:first-child').text().trim().toUpperCase() === 'PLATINUM 999';
-      }).each((i, elem) => {
-        const cells = $(elem).find('td');
-        if (cells.length >= 3) {
-          const rateText = $(cells[2]).text().trim().replace(/,/g, '');
-          if (rateText && !isNaN(parseFloat(rateText))) {
-            platinumRate = rateText;
-            return false;
+      $("tr")
+        .filter((i, elem) => {
+          return (
+            $(elem).find("td:first-child").text().trim().toUpperCase() ===
+            "PLATINUM 999"
+          );
+        })
+        .each((i, elem) => {
+          const cells = $(elem).find("td");
+          if (cells.length >= 3) {
+            const rateText = $(cells[2]).text().trim().replace(/,/g, "");
+            if (rateText && !isNaN(parseFloat(rateText))) {
+              platinumRate = rateText;
+              return false;
+            }
           }
-        }
-      });
+        });
     }
 
     if (!platinumRate) return null;
 
     const now = new Date();
     return {
-      date: now.toISOString().split('T')[0],
+      date: now.toISOString().split("T")[0],
       lblPlatinum999_AM: platinumRate,
-      lblPlatinum999_PM: platinumRate
+      lblPlatinum999_PM: platinumRate,
     };
   } catch (error) {
-    console.error('Error fetching current platinum rates:', error.message);
+    console.error("Error fetching current platinum rates:", error.message);
     return null;
   }
 };
 
 // Main export - router and middleware application
 module.exports = async (req, res) => {
-  const urlPath = req.url.split('?')[0];
+  const urlPath = req.url.split("?")[0];
 
-  if (urlPath === '/' || urlPath === '' || urlPath === '/platinum') {
+  if (urlPath === "/" || urlPath === "" || urlPath === "/platinum") {
     // Root route for platinum - no rate limit
-    res.setHeader('Cache-Control', 's-maxage=7200, stale-while-revalidate');
+    res.setHeader("Cache-Control", "s-maxage=7200, stale-while-revalidate");
     res.status(200).json({
-      message: 'Welcome to the IBJA Platinum API',
-      endpoint1: '/latest',
-      endpoint2: '/latest/rss (RSS Feed with optional ?m=YYYY-MM filter)',
-      description: 'Fetches IBJA platinum rates in India'
+      message: "Welcome to the IBJA Platinum API",
+      endpoint1: "/latest",
+      endpoint2: "/latest/rss (RSS Feed with optional ?m=YYYY-MM filter)",
+      description: "Fetches IBJA platinum rates in India",
     });
     return;
   }
 
-  if (urlPath.endsWith('/rss') && urlPath.includes('/latest')) {
+  if (urlPath.endsWith("/rss") && urlPath.includes("/latest")) {
     // RSS feed endpoint
-    applyRateLimit(generalLimiter)(req, res, () => handlePlatinumRSSFeed(req, res));
+    applyRateLimit(generalLimiter)(req, res, () =>
+      handlePlatinumRSSFeed(req, res)
+    );
     return;
   }
 
   // Assume any other path under /platinum is /latest
-  if (urlPath.includes('/latest') || urlPath === '/platinum/latest') {
-     applyRateLimit(generalLimiter)(req, res, () => handlePlatinumRequest(req, res));
-     return;
+  if (urlPath.includes("/latest") || urlPath === "/platinum/latest") {
+    applyRateLimit(generalLimiter)(req, res, () =>
+      handlePlatinumRequest(req, res)
+    );
+    return;
   }
 
   // Fallback
-  res.status(404).json({ error: 'Endpoint not found' });
+  res.status(404).json({ error: "Endpoint not found" });
 };

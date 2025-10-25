@@ -1,6 +1,7 @@
 {
   "version": 2,
   "builds": [
+    { "src": "api/api-docs.js", "use": "@vercel/node" },
     { "src": "api/index.js", "use": "@vercel/node" },
     { "src": "api/history.js", "use": "@vercel/node" },
     { "src": "api/silver.js", "use": "@vercel/node" },
@@ -11,6 +12,9 @@
     { "src": "api/chart.js", "use": "@vercel/node" }
   ],
   "routes": [
+    { "src": "/api-docs", "dest": "api/api-docs.js" },
+    { "src": "/api-docs/swagger.json", "dest": "api/api-docs.js" },
+    { "src": "/api-docs/(.*)", "dest": "api/api-docs.js" },
     { "src": "/latest", "dest": "api/index.js" },
     { "src": "/latest/rss", "dest": "api/index.js" },
     { "src": "/", "dest": "api/index.js" },

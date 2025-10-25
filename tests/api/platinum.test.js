@@ -10,11 +10,10 @@ jest.mock("../../api/_rateLimiter", () => ({
 }));
 
 // Mock RSS Utils
-jest.mock('../../api/_rssUtils', () => ({
-  generateRSSFeed: jest.fn().mockReturnValue('<rss>mock platinum feed</rss>'),
-  formatRatesForRSS: jest.fn().mockReturnValue('Platinum999 AM: ₹3500'),
+jest.mock("../../api/_rssUtils", () => ({
+  generateRSSFeed: jest.fn().mockReturnValue("<rss>mock feed</rss>"),
   getMonthFilter: jest.fn().mockReturnValue(null),
-  filterItemsByMonth: jest.fn().mockImplementation((items) => items)
+  filterItemsByMonth: jest.fn().mockImplementation((items) => items),
 }));
 
 const axios = require("axios");
@@ -182,7 +181,7 @@ describe("Platinum API Handler", () => {
   describe("GET /platinum/latest/rss", () => {
     beforeEach(() => {
       req.url = "/platinum/latest/rss";
-      req.headers = { host: "localhost:3000", 'x-forwarded-proto': 'https' };
+      req.headers = { host: "localhost:3000", "x-forwarded-proto": "https" };
       res.send = jest.fn();
     });
 
@@ -207,8 +206,12 @@ describe("Platinum API Handler", () => {
     });
 
     it("should handle RSS feed with month filter", async () => {
-      const { getMonthFilter } = require('../../api/_rssUtils');
-      getMonthFilter.mockReturnValue({ year: 2024, month: 1, monthString: '2024-01' });
+      const { getMonthFilter } = require("../../api/_rssUtils");
+      getMonthFilter.mockReturnValue({
+        year: 2024,
+        month: 1,
+        monthString: "2024-01",
+      });
 
       const mockHtmlResponse = `
         <html>
