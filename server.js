@@ -47,6 +47,7 @@ const asyncHandler = (handler) => async (req, res, next) => {
 // Root routes
 app.get("/", asyncHandler(indexHandler));
 app.get("/latest", asyncHandler(indexHandler));
+app.get("/latest/rss", asyncHandler(indexHandler));
 
 // Direct routes without /api prefix (to match Vercel structure)
 app.get("/chart", asyncHandler(chartHandler));
@@ -57,8 +58,10 @@ app.get("/pdf", asyncHandler(pdfHandler));
 app.get("/pdf/last30", asyncHandler(pdfHandler));
 app.get("/platinum", asyncHandler(platinumHandler));
 app.get("/platinum/latest", asyncHandler(platinumHandler));
+app.get("/platinum/latest/rss", asyncHandler(platinumHandler));
 app.get("/silver", asyncHandler(silverHandler));
 app.get("/silver/latest", asyncHandler(silverHandler));
+app.get("/silver/latest/rss", asyncHandler(silverHandler));
 app.get("/uptime", asyncHandler(uptimeHandler));
 
 // 404 handler

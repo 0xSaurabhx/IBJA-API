@@ -7,6 +7,7 @@ A simple API to fetch gold rates from the Indian Bullion & Jewellers Association
 - ✅ **Gold Rates**: Real-time gold rates for multiple purities (999, 995, 916, 750, 585)
 - ✅ **Silver Rates**: Live silver rates with historical data fallback
 - ✅ **Platinum Rates**: Current platinum rates for 999 purity
+- ✅ **RSS Feeds**: XML RSS feeds for all precious metals with monthly filtering support
 - ✅ **Historical Data**: AM/PM trading session data with comprehensive rate history
 - ✅ **Chart Data**: Historical comparison between 999 and 916 gold purity rates for visualization
 - ✅ **Multi-Currency Support**: Convert rates to USD, EUR, GBP, and other currencies using live exchange rates
@@ -32,17 +33,60 @@ Returns API information and available endpoints.
 {
   "message": "Welcome to the IBJA Gold API",
   "endpoint1": "/latest",
-  "endpoint2": "/history",
-  "endpoint3": "/silver",
-  "endpoint4": "/uptime",
-  "endpoint5": "/convert",
-  "endpoint6": "/platinum",
-  "endpoint7": "/pdf",
+  "endpoint2": "/latest/rss (RSS Feed with optional ?m=YYYY-MM filter)",
+  "endpoint3": "/history",
+  "endpoint4": "/silver",
+  "endpoint5": "/silver/latest",
+  "endpoint6": "/silver/latest/rss",
+  "endpoint7": "/uptime",
+  "endpoint8": "/convert",
+  "endpoint9": "/platinum",
+  "endpoint10": "/platinum/latest",
+  "endpoint11": "/platinum/latest/rss",
+  "endpoint12": "/pdf",
+  "endpoint13": "/chart",
   "description": "Fetches IBJA gold rates in India"
 }
 ```
 
-### 2. Latest Gold Rates
+### 2. Gold RSS Feed
+
+```
+GET /latest/rss
+GET /latest/rss?m=YYYY-MM
+```
+
+Returns an XML RSS feed with current gold rates. Supports optional monthly filtering.
+
+**Parameters:**
+
+- `m` (optional): Month filter in YYYY-MM format (e.g., `?m=2025-10`)
+
+**Response Headers:**
+
+- `Content-Type: application/rss+xml; charset=UTF-8`
+
+**Example RSS Output:**
+
+```xml
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>IBJA Gold Rates RSS Feed</title>
+    <description>Current gold rates from India Bullion and Jewellers Association (IBJA)</description>
+    <link>https://yourdomain.com</link>
+    <atom:link href="https://yourdomain.com/latest/rss" rel="self" type="application/rss+xml"/>
+    <lastBuildDate>Wed, 25 Oct 2025 12:00:00 GMT</lastBuildDate>
+    <generator>IBJA API RSS Generator</generator>
+    <item>
+      <title>Gold Rates - 2025-10-25</title>
+      <description>Current IBJA Gold Rates: Gold999 AM: ₹7850.00, Gold916 AM: ₹7190.00</description>
+      <pubDate>Wed, 25 Oct 2025 12:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>
+```
+
+### 3. Latest Gold Rates
 
 ```
 GET /latest
@@ -68,7 +112,44 @@ Fetches the current gold rates for different purities in both AM and PM sessions
 }
 ```
 
-### 3. Latest Silver Rates
+### 4. Silver RSS Feed
+
+```
+GET /silver/latest/rss
+GET /silver/latest/rss?m=YYYY-MM
+```
+
+Returns an XML RSS feed with current silver rates. Supports optional monthly filtering.
+
+**Parameters:**
+
+- `m` (optional): Month filter in YYYY-MM format (e.g., `?m=2025-10`)
+
+**Response Headers:**
+
+- `Content-Type: application/rss+xml; charset=UTF-8`
+
+**Example RSS Output:**
+
+```xml
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>IBJA Silver Rates RSS Feed</title>
+    <description>Current silver rates from India Bullion and Jewellers Association (IBJA)</description>
+    <link>https://yourdomain.com</link>
+    <atom:link href="https://yourdomain.com/silver/latest/rss" rel="self" type="application/rss+xml"/>
+    <lastBuildDate>Wed, 25 Oct 2025 12:00:00 GMT</lastBuildDate>
+    <generator>IBJA API RSS Generator</generator>
+    <item>
+      <title>Silver Rates - 2025-10-25</title>
+      <description>Current IBJA Silver Rates: Silver999 AM: ₹95.50, Silver999 PM: ₹94.20</description>
+      <pubDate>Wed, 25 Oct 2025 12:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>
+```
+
+### 5. Latest Silver Rates
 
 ```
 GET /silver
@@ -87,7 +168,44 @@ Fetches the current silver rates for 999 purity in both AM and PM sessions. Retu
 }
 ```
 
-### 4. Latest Platinum Rates
+### 6. Platinum RSS Feed
+
+```
+GET /platinum/latest/rss
+GET /platinum/latest/rss?m=YYYY-MM
+```
+
+Returns an XML RSS feed with current platinum rates. Supports optional monthly filtering.
+
+**Parameters:**
+
+- `m` (optional): Month filter in YYYY-MM format (e.g., `?m=2025-10`)
+
+**Response Headers:**
+
+- `Content-Type: application/rss+xml; charset=UTF-8`
+
+**Example RSS Output:**
+
+```xml
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>IBJA Platinum Rates RSS Feed</title>
+    <description>Current platinum rates from India Bullion and Jewellers Association (IBJA)</description>
+    <link>https://yourdomain.com</link>
+    <atom:link href="https://yourdomain.com/platinum/latest/rss" rel="self" type="application/rss+xml"/>
+    <lastBuildDate>Wed, 25 Oct 2025 12:00:00 GMT</lastBuildDate>
+    <generator>IBJA API RSS Generator</generator>
+    <item>
+      <title>Platinum Rates - 2025-10-25</title>
+      <description>Current IBJA Platinum Rates: Platinum999 AM: ₹3200.00, Platinum999 PM: ₹3180.00</description>
+      <pubDate>Wed, 25 Oct 2025 12:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>
+```
+
+### 7. Latest Platinum Rates
 
 ```
 GET /platinum
@@ -106,7 +224,7 @@ Fetches the current platinum rates for 999 purity in both AM and PM sessions.
 }
 ```
 
-### 5. Historical Rates
+### 8. Historical Rates
 
 ```
 GET /history
@@ -144,7 +262,7 @@ Fetches historical gold rates data for both AM and PM trading sessions.
 }
 ```
 
-### 6. Currency Converter
+### 9. Currency Converter
 
 ```
 GET /convert?from=INR&to=USD&amount=1000
@@ -171,7 +289,7 @@ Converts currency amounts using live exchange rates.
 }
 ```
 
-### 8. Chart Data Comparison
+### 10. Chart Data Comparison
 
 ```
 GET /chart
@@ -209,7 +327,7 @@ Returns historical chart data comparing 999 and 916 gold purity rates for visual
 }
 ```
 
-### 9. Uptime Status
+### 11. Uptime Status
 
 ```
 GET /uptime
@@ -228,6 +346,50 @@ Returns the API uptime status and current timestamp.
 }
 ```
 
+## RSS Feed Features
+
+The API provides RSS feeds for all precious metals, allowing you to subscribe to rate updates in your favorite RSS reader.
+
+### 📡 RSS Endpoint Summary
+
+| Metal        | RSS Endpoint           | Description                           |
+| ------------ | ---------------------- | ------------------------------------- |
+| **Gold**     | `/latest/rss`          | Current gold rates for all purities   |
+| **Silver**   | `/silver/latest/rss`   | Current silver rates for 999 purity   |
+| **Platinum** | `/platinum/latest/rss` | Current platinum rates for 999 purity |
+
+### 🔧 RSS Features
+
+- **XML Format**: Standard RSS 2.0 format with Atom namespace support
+- **Monthly Filtering**: Use `?m=YYYY-MM` parameter to filter by specific month
+- **Current Data Only**: RSS feeds contain only current rates (no historical data)
+- **Proper Headers**: Correct `Content-Type: application/rss+xml` headers
+- **Caching**: RSS feeds are cached for 1 hour for optimal performance
+- **Error Handling**: Graceful error responses for invalid month filters
+
+### 📅 Monthly Filtering Examples
+
+```bash
+# Get current month's rates
+GET /latest/rss
+
+# Get rates for October 2025
+GET /latest/rss?m=2025-10
+
+# Get silver rates for specific month
+GET /silver/latest/rss?m=2025-10
+
+# Get platinum rates for specific month
+GET /platinum/latest/rss?m=2025-10
+```
+
+### 🚨 RSS Limitations
+
+- Only current month data is available
+- Historical month requests will return an error
+- Feeds contain single current rate entry (not historical timeline)
+- Month filter validation: returns error if requested month doesn't match current month
+
 ## Precious Metals Supported
 
 This API provides rates for three major precious metals:
@@ -237,21 +399,24 @@ This API provides rates for three major precious metals:
 - **Purities**: 999, 995, 916, 750, 585
 - **Trading Sessions**: AM (Morning) & PM (Evening)
 - **Rate Format**: Per 10 grams
-- **Endpoint**: `/latest`
+- **JSON Endpoint**: `/latest`
+- **RSS Feed**: `/latest/rss`
 
 ### 🥈 Silver (Ag)
 
 - **Purity**: 999 (99.9% pure)
 - **Trading Sessions**: AM (Morning) & PM (Evening)
 - **Rate Format**: Per 1 kg
-- **Endpoint**: `/silver/latest`
+- **JSON Endpoint**: `/silver/latest`
+- **RSS Feed**: `/silver/latest/rss`
 
 ### 🥉 Platinum (Pt)
 
 - **Purity**: 999 (99.9% pure)
 - **Trading Sessions**: Single daily rate
 - **Rate Format**: Per gram
-- **Endpoint**: `/platinum/latest`
+- **JSON Endpoint**: `/platinum/latest`
+- **RSS Feed**: `/platinum/latest/rss`
 
 ## Gold Purity Types
 
@@ -298,7 +463,7 @@ vercel dev
 npm install -g nodemon
 
 # Start the development server with auto-reload
-nodemon server.js 
+nodemon server.js
 or
 npm run dev
 ```
