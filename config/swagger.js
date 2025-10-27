@@ -190,6 +190,75 @@ const swaggerDefinition = {
           },
         },
       },
+      RateChanges: {
+        type: "object",
+        properties: {
+          current: {
+            type: "object",
+            description: "Current rate entry with timestamp",
+          },
+          previous: {
+            type: "object",
+            description: "Previous rate entry for comparison",
+          },
+          changes: {
+            type: "object",
+            description: "Rate changes with percentage and trend analysis",
+          },
+          summary: {
+            type: "object",
+            description: "Summary of overall rate changes",
+          },
+        },
+      },
+      HourlyTracking: {
+        type: "object",
+        properties: {
+          date: { type: "string", description: "Date being tracked" },
+          hourlyData: {
+            type: "object",
+            description: "Rate data grouped by hour",
+          },
+          totalEntries: { type: "number", description: "Total data points" },
+          summary: {
+            type: "object",
+            description: "Hourly tracking summary",
+          },
+        },
+      },
+      WeeklyTrends: {
+        type: "object",
+        properties: {
+          current: { type: "object", description: "Current rates" },
+          weekAgo: { type: "object", description: "Rates from week ago" },
+          weeklyChanges: {
+            type: "object",
+            description: "Weekly rate changes analysis",
+          },
+          weeklyHighLow: {
+            type: "object",
+            description: "Daily high/low data for the week",
+          },
+          summary: {
+            type: "object",
+            description: "Weekly trend summary",
+          },
+        },
+      },
+      DailyHighLow: {
+        type: "object",
+        properties: {
+          date: { type: "string", description: "Date of high/low data" },
+          highLow: {
+            type: "object",
+            description: "High and low rates for each metal type",
+          },
+          summary: {
+            type: "object",
+            description: "High/low summary with volatility metrics",
+          },
+        },
+      },
       Error: {
         type: "object",
         properties: {

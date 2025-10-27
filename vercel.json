@@ -9,7 +9,8 @@
     { "src": "api/convert.js", "use": "@vercel/node" },
     { "src": "api/platinum.js", "use": "@vercel/node" },
     { "src": "api/pdf.js", "use": "@vercel/node" },
-    { "src": "api/chart.js", "use": "@vercel/node" }
+    { "src": "api/chart.js", "use": "@vercel/node" },
+    { "src": "api/changes.js", "use": "@vercel/node" }
   ],
   "routes": [
     { "src": "/api-docs", "dest": "api/api-docs.js" },
@@ -30,6 +31,10 @@
     { "src": "/pdf", "dest": "api/pdf.js" },
     { "src": "/pdf/last30", "dest": "api/pdf.js" },
     { "src": "/chart", "dest": "api/chart.js" },
-    { "src": "/chart/comparison", "dest": "api/chart.js" }
+    { "src": "/chart/comparison", "dest": "api/chart.js" },
+    { "src": "/changes", "dest": "api/changes.js" },
+    { "src": "/changes/hourly", "dest": "api/changes.js" },
+    { "src": "/changes/weekly", "dest": "api/changes.js" },
+    { "src": "/changes/highs", "dest": "api/changes.js" }
   ]
 }

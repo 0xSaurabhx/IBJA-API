@@ -11,6 +11,7 @@ const pdfHandler = require("./api/pdf");
 const platinumHandler = require("./api/platinum");
 const silverHandler = require("./api/silver");
 const uptimeHandler = require("./api/uptime");
+const changesHandler = require("./api/changes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -359,6 +360,76 @@ app.get("/silver/latest/rss", asyncHandler(silverHandler));
  */
 app.get("/uptime", asyncHandler(uptimeHandler));
 
+/**
+ * @swagger
+ * /changes:
+ *   get:
+ *     summary: Get rate changes since yesterday
+ *     tags: [Rate Changes]
+ *     responses:
+ *       200:
+ *         description: Daily rate changes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RateChanges'
+ */
+app.get("/changes", asyncHandler(changesHandler));
+
+/**
+ * @swagger
+ * /changes/hourly:
+ *   get:
+ *     summary: Get hourly rate tracking for today
+ *     tags: [Rate Changes]
+ *     responses:
+ *       200:
+ *         description: Hourly rate tracking data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/HourlyTracking'
+ */
+app.get("/changes/hourly", asyncHandler(changesHandler));
+
+/**
+ * @swagger
+ * /changes/weekly:
+ *   get:
+ *     summary: Get weekly rate trends
+ *     tags: [Rate Changes]
+ *     responses:
+ *       200:
+ *         description: Weekly rate trends and analysis
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/WeeklyTrends'
+ */
+app.get("/changes/weekly", asyncHandler(changesHandler));
+
+/**
+ * @swagger
+ * /changes/highs:
+ *   get:
+ *     summary: Get daily high/low rates
+ *     tags: [Rate Changes]
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         schema:
+ *           type: string
+ *         description: Date in YYYY-MM-DD format (defaults to today)
+ *     responses:
+ *       200:
+ *         description: Daily high and low rates
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DailyHighLow'
+ */
+app.get("/changes/highs", asyncHandler(changesHandler));
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({
@@ -378,6 +449,10 @@ app.use((req, res) => {
       "/silver",
       "/silver/latest",
       "/uptime",
+      "/changes",
+      "/changes/hourly",
+      "/changes/weekly",
+      "/changes/highs",
     ],
   });
 });
