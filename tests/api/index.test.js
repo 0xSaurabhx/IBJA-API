@@ -65,6 +65,10 @@ describe("Index API Handler", () => {
         endpoint11: "/platinum/latest/rss",
         endpoint12: "/pdf",
         endpoint13: "/chart",
+        endpoint14: "/changes",
+        endpoint15: "/changes/hourly",
+        endpoint16: "/changes/weekly",
+        endpoint17: "/changes/highs",
         description: "Fetches IBJA gold rates in India",
       });
     });
