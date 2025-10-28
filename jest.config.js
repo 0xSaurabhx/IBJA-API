@@ -12,7 +12,9 @@ module.exports = {
   collectCoverageFrom: [
     "api/**/*.js",
     "api/_rateLimiter.js",
+    "!api/api-docs.js",
     "!**/node_modules/**",
+    "!utils/**",
   ],
 
   // Setup files

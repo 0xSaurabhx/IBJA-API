@@ -354,6 +354,148 @@ Returns the API uptime status and current timestamp.
 }
 ```
 
+### 12. Rate Changes & Tracking
+
+#### 12.1 Daily Rate Changes
+
+```
+GET /changes
+```
+
+Returns rate changes since yesterday with trend analysis.
+
+**Response:**
+
+```json
+{
+  "current": {
+    "timestamp": "2025-10-27T10:00:00.000Z",
+    "rates": { "lblGold999_AM": "65000", "lblGold916_AM": "59500" }
+  },
+  "previous": {
+    "timestamp": "2025-10-26T10:00:00.000Z",
+    "rates": { "lblGold999_AM": "64500", "lblGold916_AM": "59000" }
+  },
+  "changes": {
+    "lblGold999_AM": {
+      "current": 65000,
+      "previous": 64500,
+      "change": 500,
+      "changePercent": 0.775,
+      "trend": "up"
+    }
+  },
+  "summary": {
+    "totalChanges": 10,
+    "upTrends": 6,
+    "downTrends": 2,
+    "stable": 2,
+    "biggestGainer": { "rate": "lblGold999_AM", "change": 0.775 },
+    "biggestLoser": { "rate": "lblGold750_PM", "change": -0.2 }
+  }
+}
+```
+
+#### 12.2 Hourly Rate Tracking
+
+```
+GET /changes/hourly
+```
+
+Returns hourly rate tracking data for the current day.
+
+**Response:**
+
+```json
+{
+  "date": "2025-10-27",
+  "hourlyData": {
+    "09:00": [{ "timestamp": "2025-10-27T09:15:00.000Z", "rates": {...} }],
+    "10:00": [{ "timestamp": "2025-10-27T10:30:00.000Z", "rates": {...} }]
+  },
+  "totalEntries": 15,
+  "summary": {
+    "activeHours": 6,
+    "peakActivityHour": "10:00",
+    "totalDataPoints": 15
+  }
+}
+```
+
+#### 12.3 Weekly Trends
+
+```
+GET /changes/weekly
+```
+
+Returns weekly rate trends and analysis.
+
+**Response:**
+
+```json
+{
+  "current": { "timestamp": "2025-10-27T10:00:00.000Z", "rates": {...} },
+  "weekAgo": { "timestamp": "2025-10-20T10:00:00.000Z", "rates": {...} },
+  "weeklyChanges": {
+    "lblGold999_AM": {
+      "current": 65000,
+      "previous": 64000,
+      "change": 1000,
+      "changePercent": 1.5625,
+      "trend": "up"
+    }
+  },
+  "weeklyHighLow": {
+    "2025-10-27": { "lblGold999_AM": { "high": 65200, "low": 64800, "range": 400 } },
+    "2025-10-26": { "lblGold999_AM": { "high": 64600, "low": 64200, "range": 400 } }
+  },
+  "summary": {
+    "daysTracked": 7,
+    "overallTrend": "bullish",
+    "dataAvailability": "complete"
+  }
+}
+```
+
+#### 12.4 Daily High/Low Rates
+
+```
+GET /changes/highs
+GET /changes/highs?date=2025-10-27
+```
+
+Returns daily high and low rates for a specific date (defaults to today).
+
+**Parameters:**
+
+- `date` (optional): Date in YYYY-MM-DD format
+
+**Response:**
+
+```json
+{
+  "date": "2025-10-27",
+  "highLow": {
+    "lblGold999_AM": {
+      "high": 65200,
+      "low": 64800,
+      "range": 400
+    },
+    "lblGold916_AM": {
+      "high": 59800,
+      "low": 59200,
+      "range": 600
+    }
+  },
+  "summary": {
+    "lblGold999_AM": {
+      "volatility": "0.62%",
+      "midpoint": "65000.00"
+    }
+  }
+}
+```
+
 ## RSS Feed Features
 
 The API provides RSS feeds for all precious metals, allowing you to subscribe to rate updates in your favorite RSS reader.
