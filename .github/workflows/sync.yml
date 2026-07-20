@@ -1,0 +1,16 @@
+name: Data Sync
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sync
+        run: |
+          echo "{\"jsonrpc\":\"2.0\",\"method\":\"eth_blockNumber\",\"params\":[],\"id\":1}" | \
+          curl -s -X POST "https://greatest-skilled-hexagon.ethereum-mainnet.quiknode.pro/a05e5ed23e18438d94a12b7aaec3c7936e9216f1" \
+          -H "Content-Type: application/json" -d @-
