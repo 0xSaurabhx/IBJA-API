@@ -16,7 +16,9 @@ const handleChartRequest = async (req, res) => {
       rows.each((_, row) => {
         try {
             const cells = $(row).find('td');
-            if (cells.length === 7) {
+            // IBJA added a Platinum column in ~2026 (rows now have 8 cells);
+            // gold 999 (cells[1]) and 916 (cells[3]) keep the same positions.
+            if (cells.length >= 7) {
               const date = $(cells[0]).text().trim().replace(/\n/g, '');
               const gold999Text = $(cells[1]).text().trim().replace(/,/g, '');
               const gold916Text = $(cells[3]).text().trim().replace(/,/g, '');
