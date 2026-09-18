@@ -96,6 +96,7 @@ describe("Index API Handler", () => {
       const mockHtmlResponse = `
         <html>
           <body>
+            <input id="HdnGold" value='{"labels":["17/09/2026"]}' />
             <span id="lblGold999_AM">65000</span>
             <span id="lblGold995_AM">64500</span>
             <span id="lblGold916_AM">59500</span>
@@ -117,12 +118,12 @@ describe("Index API Handler", () => {
       expect(mockedAxios.get).toHaveBeenCalledWith("https://www.ibjarates.com");
       expect(res.setHeader).toHaveBeenCalledWith(
         "Cache-Control",
-        "s-maxage=7200, stale-while-revalidate"
+        "s-maxage=600, stale-while-revalidate=60"
       );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          date: expect.any(String),
+          date: "2026-09-17",
           lblGold999_AM: "65000",
           lblGold995_AM: "64500",
           lblGold916_AM: "59500",
@@ -134,6 +135,19 @@ describe("Index API Handler", () => {
           lblGold995_PM: "64550",
           lblGold999_PM: "65050",
         })
+      );
+    });
+
+    it("should return a null date when IBJA's date metadata is malformed", async () => {
+      mockedAxios.get.mockResolvedValue({
+        data: `<input id="HdnGold" value="not-json" /><span id="lblGold999_AM">65000</span>`,
+      });
+
+      await indexHandler(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({ date: null, lblGold999_AM: "65000" })
       );
     });
 
