@@ -1,7 +1,10 @@
 // Mock the rate limiter before requiring the handler
 jest.mock("../../api/_rateLimiter", () => ({
   dataHeavyLimiter: { points: 20 },
-  applyRateLimit: jest.fn(() => (handler) => handler),
+  applyRateLimit: jest.fn(() => (req, res, next) => {
+    res.setHeader("X-RateLimit-Limit", 20);
+    next();
+  }),
 }));
 
 const axios = require("axios");
