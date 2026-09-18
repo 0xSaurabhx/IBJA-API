@@ -202,9 +202,31 @@ app.get("/convert", asyncHandler(convertHandler));
  *   get:
  *     summary: Get historical gold rates data
  *     tags: [Historical Data]
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         schema:
+ *           type: string
+ *         description: Single day filter (YYYY-MM-DD or DD/MM/YYYY)
+ *       - in: query
+ *         name: from
+ *         schema:
+ *           type: string
+ *         description: Range start, inclusive (YYYY-MM-DD or DD/MM/YYYY)
+ *       - in: query
+ *         name: to
+ *         schema:
+ *           type: string
+ *         description: Range end, inclusive (YYYY-MM-DD or DD/MM/YYYY)
+ *       - in: query
+ *         name: session
+ *         schema:
+ *           type: string
+ *           enum: [am, pm]
+ *         description: Return only one session's table
  *     responses:
  *       200:
- *         description: Historical gold rates
+ *         description: Historical gold rates (am/pm tables plus the longer daily close series from IBJA chart data)
  *         content:
  *           application/json:
  *             schema:
