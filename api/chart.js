@@ -119,4 +119,6 @@ const handleChartRequest = async (req, res) => {
 };
 
 // Apply middleware
-module.exports = applyRateLimit(dataHeavyLimiter)(handleChartRequest);
+module.exports = async (req, res) => {
+  applyRateLimit(dataHeavyLimiter)(req, res, () => handleChartRequest(req, res));
+};
