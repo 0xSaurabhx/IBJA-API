@@ -59,4 +59,6 @@ const handleHistoryRequest = async (req, res) => {
 };
 
 // Apply middleware
-module.exports = applyRateLimit(dataHeavyLimiter)(handleHistoryRequest);
+module.exports = async (req, res) => {
+  applyRateLimit(dataHeavyLimiter)(req, res, () => handleHistoryRequest(req, res));
+};
