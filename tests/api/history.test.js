@@ -262,4 +262,229 @@ describe("History API Handler", () => {
       error: "Failed to fetch historical rates",
     });
   });
+
+  it("should include date_iso on table rows", async () => {
+    const mockHtmlResponse = `
+      <html>
+        <body>
+          <div id="tab-am">
+            <table>
+              <tbody>
+                <tr>
+                  <td>23/10/2024</td>
+                  <td>65000</td>
+                  <td>64500</td>
+                  <td>59500</td>
+                  <td>48750</td>
+                  <td>38025</td>
+                  <td>85000</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="tab-pm">
+            <table><tbody></tbody></table>
+          </div>
+        </body>
+      </html>
+    `;
+
+    mockedAxios.get.mockResolvedValue({ data: mockHtmlResponse });
+
+    await historyHandler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        am: expect.arrayContaining([
+          expect.objectContaining({
+            date: "23/10/2024",
+            date_iso: "2024-10-23",
+          }),
+        ]),
+      })
+    );
+  });
+
+  it("should parse the longer daily series from hidden chart fields", async () => {
+    const mockHtmlResponse = `
+      <html>
+        <body>
+          <div id="tab-am">
+            <table><tbody></tbody></table>
+          </div>
+          <div id="tab-pm">
+            <table><tbody></tbody></table>
+          </div>
+          <input id="HdnGold" value="{&quot;labels&quot;:[&quot;15/09/2026&quot;,&quot;16/09/2026&quot;],&quot;purity999&quot;:[151050,151894],&quot;purity916&quot;:[138362,139135]}" />
+          <input id="HdnSilver" value="{&quot;labels&quot;:[&quot;15/09/2026&quot;,&quot;16/09/2026&quot;],&quot;silverRate&quot;:[227650,231159]}" />
+        </body>
+      </html>
+    `;
+
+    mockedAxios.get.mockResolvedValue({ data: mockHtmlResponse });
+
+    await historyHandler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        am: [],
+        pm: [],
+        daily: [
+          expect.objectContaining({
+            date: "15/09/2026",
+            date_iso: "2026-09-15",
+            gold_999: 151050,
+            gold_916: 138362,
+            silver_999: 227650,
+          }),
+          expect.objectContaining({
+            date: "16/09/2026",
+            date_iso: "2026-09-16",
+            gold_999: 151894,
+            gold_916: 139135,
+            silver_999: 231159,
+          }),
+        ],
+      })
+    );
+  });
+
+  it("should filter by ?date=", async () => {
+    const mockHtmlResponse = `
+      <html>
+        <body>
+          <div id="tab-am">
+            <table>
+              <tbody>
+                <tr>
+                  <td>15/09/2026</td>
+                  <td>151050</td>
+                  <td>150445</td>
+                  <td>138362</td>
+                  <td>113228</td>
+                  <td>88364</td>
+                  <td>227650</td>
+                  <td>61251</td>
+                </tr>
+                <tr>
+                  <td>16/09/2026</td>
+                  <td>151894</td>
+                  <td>151286</td>
+                  <td>139135</td>
+                  <td>113921</td>
+                  <td>88858</td>
+                  <td>231159</td>
+                  <td>61077</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="tab-pm">
+            <table><tbody></tbody></table>
+          </div>
+          <input id="HdnGold" value="{&quot;labels&quot;:[&quot;15/09/2026&quot;,&quot;16/09/2026&quot;],&quot;purity999&quot;:[151050,151894],&quot;purity916&quot;:[138362,139135]}" />
+          <input id="HdnSilver" value="{&quot;labels&quot;:[&quot;15/09/2026&quot;,&quot;16/09/2026&quot;],&quot;silverRate&quot;:[227650,231159]}" />
+        </body>
+      </html>
+    `;
+
+    mockedAxios.get.mockResolvedValue({ data: mockHtmlResponse });
+    req.query = { date: "2026-09-16" };
+
+    await historyHandler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    const body = res.json.mock.calls[0][0];
+    expect(body.am).toHaveLength(1);
+    expect(body.am[0].date).toBe("16/09/2026");
+    expect(body.daily).toHaveLength(1);
+    expect(body.daily[0].date_iso).toBe("2026-09-16");
+  });
+
+  it("should filter by ?from=?to=?session=", async () => {
+    const mockHtmlResponse = `
+      <html>
+        <body>
+          <div id="tab-am">
+            <table>
+              <tbody>
+                <tr>
+                  <td>15/09/2026</td>
+                  <td>151050</td>
+                  <td>150445</td>
+                  <td>138362</td>
+                  <td>113228</td>
+                  <td>88364</td>
+                  <td>227650</td>
+                  <td>61251</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="tab-pm">
+            <table>
+              <tbody>
+                <tr>
+                  <td>15/09/2026</td>
+                  <td>150902</td>
+                  <td>150298</td>
+                  <td>138226</td>
+                  <td>113177</td>
+                  <td>88278</td>
+                  <td>228741</td>
+                  <td>61251</td>
+                </tr>
+                <tr>
+                  <td>16/09/2026</td>
+                  <td>152362</td>
+                  <td>151752</td>
+                  <td>139564</td>
+                  <td>114272</td>
+                  <td>89132</td>
+                  <td>231337</td>
+                  <td>61040</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </body>
+      </html>
+    `;
+
+    mockedAxios.get.mockResolvedValue({ data: mockHtmlResponse });
+    req.query = { from: "15/09/2026", to: "15/09/2026", session: "pm" };
+
+    await historyHandler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    const body = res.json.mock.calls[0][0];
+    expect(body.am).toEqual([]);
+    expect(body.pm).toHaveLength(1);
+    expect(body.pm[0].date).toBe("15/09/2026");
+  });
+
+  it("should return 400 for invalid date parameters", async () => {
+    mockedAxios.get.mockResolvedValue({ data: "<html></html>" });
+    req.query = { date: "not-a-date" };
+
+    await historyHandler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        error: expect.stringContaining("Invalid date"),
+      })
+    );
+  });
+
+  it("should return 400 for invalid session parameter", async () => {
+    mockedAxios.get.mockResolvedValue({ data: "<html></html>" });
+    req.query = { session: "evening" };
+
+    await historyHandler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
 });
