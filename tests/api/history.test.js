@@ -121,6 +121,57 @@ describe("History API Handler", () => {
     );
   });
 
+  it("should parse rows with 8 columns (current IBJA layout with Platinum)", async () => {
+    const mockHtmlResponse = `
+      <html>
+        <body>
+          <div id="tab-am">
+            <table>
+              <tbody>
+                <tr>
+                  <td>31/08/2026</td>
+                  <td>155125</td>
+                  <td>154504</td>
+                  <td>142095</td>
+                  <td>116344</td>
+                  <td>90748</td>
+                  <td>235455</td>
+                  <td>64231</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="tab-pm">
+            <table><tbody></tbody></table>
+          </div>
+        </body>
+      </html>
+    `;
+
+    mockedAxios.get.mockResolvedValue({ data: mockHtmlResponse });
+
+    await historyHandler(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        am: expect.arrayContaining([
+          expect.objectContaining({
+            date: "31/08/2026",
+            gold_999: "155125",
+            gold_995: "154504",
+            gold_916: "142095",
+            gold_750: "116344",
+            gold_585: "90748",
+            silver_999: "235455",
+            platinum_999: "64231",
+          }),
+        ]),
+        pm: [],
+      })
+    );
+  });
+
   it("should return 404 when no historical data found", async () => {
     const mockEmptyHtmlResponse = `
       <html>

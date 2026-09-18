@@ -12,9 +12,11 @@ const handleHistoryRequest = async (req, res) => {
       const rows = $(`${tabId} table tbody tr`);
       const history = [];
 
+      // Column layout (IBJA added a Platinum column in ~2026, so rows now have
+      // 8 cells instead of 7): date, 999, 995, 916, 750, 585, Silver 999, Platinum 999.
       rows.each((_, row) => {
         const cells = $(row).find('td');
-        if (cells.length === 7) {
+        if (cells.length >= 7) {
           // Add basic validation for rates
           const gold_999 = $(cells[1]).text().trim();
           const silver_999 = $(cells[6]).text().trim();
@@ -26,7 +28,8 @@ const handleHistoryRequest = async (req, res) => {
                gold_916: $(cells[3]).text().trim() || null,
                gold_750: $(cells[4]).text().trim() || null,
                gold_585: $(cells[5]).text().trim() || null,
-               silver_999: silver_999 || null
+               silver_999: silver_999 || null,
+               platinum_999: cells.length >= 8 ? ($(cells[7]).text().trim() || null) : null
              });
           }
         }
