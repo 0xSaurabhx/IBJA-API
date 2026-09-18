@@ -20,6 +20,20 @@ const GOLD_IDS = [
   "lblGold999_PM",
 ];
 
+// Convert the latest IBJA chart label (DD/MM/YYYY) into the API's ISO date.
+const getLatestRateDate = ($) => {
+  try {
+    const chartData = JSON.parse($("#HdnGold").val() || "{}");
+    const latest = Array.isArray(chartData.labels) ? chartData.labels.at(-1) : null;
+    const match = latest && latest.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (match) return `${match[3]}-${match[2]}-${match[1]}`;
+  } catch (error) {
+    console.warn("Could not parse the latest IBJA rate date:", error.message);
+  }
+
+  return null;
+};
+
 // Core logic for fetching latest gold rates
 const handleLatestGoldRequest = async (req, res) => {
   try {
@@ -43,12 +57,12 @@ const handleLatestGoldRequest = async (req, res) => {
         .json({ error: "Live gold rates not available currently." });
     }
 
-    const now = new Date();
+    const rateDate = getLatestRateDate($);
 
-    // Cache header
-    res.setHeader("Cache-Control", "s-maxage=7200, stale-while-revalidate"); // 2 hours
+    // Keep fresh enough to pick up IBJA's AM/PM publications promptly.
+    res.setHeader("Cache-Control", "s-maxage=600, stale-while-revalidate=60");
     res.status(200).json({
-      date: now.toISOString().split("T")[0],
+      date: rateDate,
       ...result,
     });
   } catch (error) {
@@ -150,9 +164,8 @@ const getCurrentGoldRates = async () => {
     const foundRates = Object.values(result).some((rate) => rate !== null);
     if (!foundRates) return null;
 
-    const now = new Date();
     return {
-      date: now.toISOString().split("T")[0],
+      date: getLatestRateDate($),
       ...result,
     };
   } catch (error) {
