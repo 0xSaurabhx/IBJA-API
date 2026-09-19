@@ -40,6 +40,7 @@ Returns API information and available endpoints.
 ```json
 {
   "message": "Welcome to the IBJA Gold API",
+  "documentation": "/api-docs",
   "endpoint1": "/latest",
   "endpoint2": "/latest/rss (RSS Feed with optional ?m=YYYY-MM filter)",
   "endpoint3": "/history",
@@ -53,6 +54,10 @@ Returns API information and available endpoints.
   "endpoint11": "/platinum/latest/rss",
   "endpoint12": "/pdf",
   "endpoint13": "/chart",
+  "endpoint14": "/changes",
+  "endpoint15": "/changes/hourly",
+  "endpoint16": "/changes/weekly",
+  "endpoint17": "/changes/highs",
   "description": "Fetches IBJA gold rates in India"
 }
 ```
@@ -64,11 +69,11 @@ GET /latest/rss
 GET /latest/rss?m=YYYY-MM
 ```
 
-Returns an XML RSS feed with current gold rates. Supports optional monthly filtering.
+Returns an XML RSS feed with gold rates. The feed contains one `<item>` per trading session per day (AM and PM entries) built from the historical rate tables — not just the current rate — so subscribers receive the recent rate history as well.
 
 **Parameters:**
 
-- `m` (optional): Month filter in YYYY-MM format (e.g., `?m=2025-10`)
+- `m` (optional): Month filter in YYYY-MM format (e.g., `?m=2025-10`). Only months present in the scraped history return items; other months return a 404 JSON error naming the requested month.
 
 **Response Headers:**
 
@@ -80,14 +85,19 @@ Returns an XML RSS feed with current gold rates. Supports optional monthly filte
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>IBJA Gold Rates RSS Feed</title>
-    <description>Current gold rates from India Bullion and Jewellers Association (IBJA)</description>
-    <link>https://yourdomain.com</link>
-    <atom:link href="https://yourdomain.com/latest/rss" rel="self" type="application/rss+xml"/>
+    <description>Historical and current gold rates from India Bullion and Jewellers Association (IBJA)</description>
+    <link>https://ibja-api.vercel.app</link>
+    <atom:link href="https://ibja-api.vercel.app/latest/rss" rel="self" type="application/rss+xml"/>
     <lastBuildDate>Wed, 25 Oct 2025 12:00:00 GMT</lastBuildDate>
     <generator>IBJA API RSS Generator</generator>
     <item>
-      <title>Gold Rates - 2025-10-25</title>
-      <description>Current IBJA Gold Rates: Gold999 AM: ₹7850.00, Gold916 AM: ₹7190.00</description>
+      <title>Gold Rates - 25/10/2025 (AM)</title>
+      <description><![CDATA[AM IBJA Gold Rates: 999: ₹7850.00, 916: ₹7190.00, 995: ₹7810.00]]></description>
+      <pubDate>Wed, 25 Oct 2025 12:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Gold Rates - 25/10/2025 (PM)</title>
+      <description><![CDATA[PM IBJA Gold Rates: 999: ₹7855.00, 916: ₹7195.00, 995: ₹7815.00]]></description>
       <pubDate>Wed, 25 Oct 2025 12:00:00 GMT</pubDate>
     </item>
   </channel>
@@ -127,11 +137,11 @@ GET /silver/latest/rss
 GET /silver/latest/rss?m=YYYY-MM
 ```
 
-Returns an XML RSS feed with current silver rates. Supports optional monthly filtering.
+Returns an XML RSS feed with silver rates. Like the gold feed, it contains one `<item>` per trading session per day built from the historical rate tables.
 
 **Parameters:**
 
-- `m` (optional): Month filter in YYYY-MM format (e.g., `?m=2025-10`)
+- `m` (optional): Month filter in YYYY-MM format (e.g., `?m=2025-10`). Only months present in the scraped history return items; other months return a 404 JSON error naming the requested month.
 
 **Response Headers:**
 
@@ -143,14 +153,19 @@ Returns an XML RSS feed with current silver rates. Supports optional monthly fil
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>IBJA Silver Rates RSS Feed</title>
-    <description>Current silver rates from India Bullion and Jewellers Association (IBJA)</description>
-    <link>https://yourdomain.com</link>
-    <atom:link href="https://yourdomain.com/silver/latest/rss" rel="self" type="application/rss+xml"/>
+    <description>Historical and current silver rates from India Bullion and Jewellers Association (IBJA)</description>
+    <link>https://ibja-api.vercel.app</link>
+    <atom:link href="https://ibja-api.vercel.app/silver/latest/rss" rel="self" type="application/rss+xml"/>
     <lastBuildDate>Wed, 25 Oct 2025 12:00:00 GMT</lastBuildDate>
     <generator>IBJA API RSS Generator</generator>
     <item>
-      <title>Silver Rates - 2025-10-25</title>
-      <description>Current IBJA Silver Rates: Silver999 AM: ₹95.50, Silver999 PM: ₹94.20</description>
+      <title>Silver Rates - 25/10/2025 (AM)</title>
+      <description><![CDATA[AM IBJA Silver Rates: 999: ₹95.50]]></description>
+      <pubDate>Wed, 25 Oct 2025 12:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Silver Rates - 25/10/2025 (PM)</title>
+      <description><![CDATA[PM IBJA Silver Rates: 999: ₹94.20]]></description>
       <pubDate>Wed, 25 Oct 2025 12:00:00 GMT</pubDate>
     </item>
   </channel>
@@ -183,11 +198,11 @@ GET /platinum/latest/rss
 GET /platinum/latest/rss?m=YYYY-MM
 ```
 
-Returns an XML RSS feed with current platinum rates. Supports optional monthly filtering.
+Returns an XML RSS feed with the current platinum rate. Unlike the gold and silver feeds, it contains a single `<item>`: IBJA publishes no historical platinum table, so there is no session history to build a timeline from — the feed wraps the current daily rate only.
 
 **Parameters:**
 
-- `m` (optional): Month filter in YYYY-MM format (e.g., `?m=2025-10`)
+- `m` (optional): Month filter in YYYY-MM format (e.g., `?m=2025-10`). A month with no current data returns a 404 JSON error.
 
 **Response Headers:**
 
@@ -200,13 +215,13 @@ Returns an XML RSS feed with current platinum rates. Supports optional monthly f
   <channel>
     <title>IBJA Platinum Rates RSS Feed</title>
     <description>Current platinum rates from India Bullion and Jewellers Association (IBJA)</description>
-    <link>https://yourdomain.com</link>
-    <atom:link href="https://yourdomain.com/platinum/latest/rss" rel="self" type="application/rss+xml"/>
+    <link>https://ibja-api.vercel.app</link>
+    <atom:link href="https://ibja-api.vercel.app/platinum/latest/rss" rel="self" type="application/rss+xml"/>
     <lastBuildDate>Wed, 25 Oct 2025 12:00:00 GMT</lastBuildDate>
     <generator>IBJA API RSS Generator</generator>
     <item>
       <title>Platinum Rates - 2025-10-25</title>
-      <description>Current IBJA Platinum Rates: Platinum999 AM: ₹3200.00, Platinum999 PM: ₹3180.00</description>
+      <description><![CDATA[Current IBJA Platinum Rates: 999: ₹3200.00]]></description>
       <pubDate>Wed, 25 Oct 2025 12:00:00 GMT</pubDate>
     </item>
   </channel>
@@ -253,7 +268,8 @@ Fetches historical gold rates data for both AM and PM trading sessions.
       "gold_916": "7190.00",
       "gold_750": "5890.00",
       "gold_585": "4595.00",
-      "silver_999": "95.50"
+      "silver_999": "95.50",
+      "platinum_999": "32.00"
     }
   ],
   "pm": [
@@ -264,11 +280,14 @@ Fetches historical gold rates data for both AM and PM trading sessions.
       "gold_916": "7190.00",
       "gold_750": "5890.00",
       "gold_585": "4595.00",
-      "silver_999": "95.50"
+      "silver_999": "95.50",
+      "platinum_999": "32.00"
     }
   ]
 }
 ```
+
+> **Why `platinum_999`?** IBJA added a Platinum column to its rate tables in ~2026, so each row now carries the daily platinum close alongside gold and silver.
 
 ### 9. Currency Converter
 
@@ -304,7 +323,7 @@ GET /chart
 GET /chart/comparison
 ```
 
-Returns historical chart data comparing 999 and 916 gold purity rates for visualization.
+Returns historical chart data comparing 999 and 916 gold purity rates for visualization. AM and PM sessions are merged into a single `data` array sorted newest-first (there are no separate `am`/`pm` keys); `statistics` are computed over exactly the records in `data`, which is why the counts are named `total_records_parsed` / `valid_records_combined`.
 
 **Response:**
 
@@ -317,8 +336,8 @@ Returns historical chart data comparing 999 and 916 gold purity rates for visual
     "average_999": 7850.00,
     "average_916": 7190.00,
     "average_difference": 660.00,
-    "total_records": 20,
-    "valid_records": 20
+    "total_records_parsed": 20,
+    "valid_records_combined": 20
   },
   "data": [
     {
@@ -330,8 +349,6 @@ Returns historical chart data comparing 999 and 916 gold purity rates for visual
       "purity_ratio": "1.0918"
     }
   ],
-  "am": [...],
-  "pm": [...]
 }
 ```
 
@@ -511,11 +528,11 @@ The API provides RSS feeds for all precious metals, allowing you to subscribe to
 ### 🔧 RSS Features
 
 - **XML Format**: Standard RSS 2.0 format with Atom namespace support
-- **Monthly Filtering**: Use `?m=YYYY-MM` parameter to filter by specific month
-- **Current Data Only**: RSS feeds contain only current rates (no historical data)
+- **Monthly Filtering**: Use `?m=YYYY-MM` parameter to filter items by month
+- **Session Timeline**: Gold and silver feeds emit one `<item>` per trading session per day (AM and PM) from the historical rate tables — the exception is platinum (see below)
 - **Proper Headers**: Correct `Content-Type: application/rss+xml` headers
 - **Caching**: RSS feeds are cached for 1 hour for optimal performance
-- **Error Handling**: Graceful error responses for invalid month filters
+- **Error Handling**: JSON 404 errors naming the requested month when no data exists for it (plus an `availableItems` count); a malformed `?m=` value is ignored and returns the unfiltered feed
 
 ### 📅 Monthly Filtering Examples
 
@@ -535,10 +552,9 @@ GET /platinum/latest/rss?m=2025-10
 
 ### 🚨 RSS Limitations
 
-- Only current month data is available
-- Historical month requests will return an error
-- Feeds contain single current rate entry (not historical timeline)
-- Month filter validation: returns error if requested month doesn't match current month
+- Feed history is bounded by what IBJA publishes: the gold/silver tables cover only recent trading days, so older `?m=` values 404 rather than reaching further back
+- The platinum feed contains a single current-rate entry (no historical timeline), because IBJA publishes no historical platinum table to build one from — unlike gold and silver, which have full AM/PM session tables
+- Month filter validation is lenient: a malformed `?m=` is silently ignored instead of erroring
 
 ## Precious Metals Supported
 
