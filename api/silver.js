@@ -25,7 +25,9 @@ const handleSilverRequest = async (req, res) => {
         // Find the first row with a valid silver rate
         for (let i = 0; i < rows.length; i++) {
           const cells = $(rows[i]).find("td");
-          if (cells.length === 7) {
+          // IBJA added a Platinum column in ~2026 (rows now have 8 cells);
+          // silver 999 (cells[6]) keeps the same position.
+          if (cells.length >= 7) {
             const silverRate = $(cells[6]).text().trim();
             if (silverRate) return silverRate;
           }
@@ -148,7 +150,9 @@ const getCurrentSilverRates = async () => {
         const rows = $(`${tabId} table tbody tr`);
         for (let i = 0; i < rows.length; i++) {
           const cells = $(rows[i]).find("td");
-          if (cells.length === 7) {
+          // IBJA added a Platinum column in ~2026 (rows now have 8 cells);
+          // silver 999 (cells[6]) keeps the same position.
+          if (cells.length >= 7) {
             const silverRate = $(cells[6]).text().trim();
             if (silverRate) return silverRate;
           }
@@ -186,7 +190,9 @@ const getHistoricalSilverData = async () => {
 
       rows.each((_, row) => {
         const cells = $(row).find("td");
-        if (cells.length === 7) {
+        // IBJA added a Platinum column in ~2026 (rows now have 8 cells);
+        // silver 999 (cells[6]) keeps the same position.
+        if (cells.length >= 7) {
           const silver_999 = $(cells[6]).text().trim();
           const dateText = $(cells[0]).text().trim().replace(/\n/g, "");
 
