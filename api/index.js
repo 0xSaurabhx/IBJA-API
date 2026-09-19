@@ -186,7 +186,9 @@ const getHistoricalGoldData = async () => {
 
       rows.each((_, row) => {
         const cells = $(row).find("td");
-        if (cells.length === 7) {
+        // IBJA added a Platinum column in ~2026 (rows now have 8 cells);
+        // gold columns keep the same positions.
+        if (cells.length >= 7) {
           const gold_999 = $(cells[1]).text().trim();
           const gold_916 = $(cells[3]).text().trim();
           const dateText = $(cells[0]).text().trim().replace(/\n/g, "");

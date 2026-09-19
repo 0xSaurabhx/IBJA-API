@@ -210,6 +210,45 @@ describe("Index API Handler", () => {
       expect(res.setHeader).toHaveBeenCalled();
     });
 
+    it("should return RSS feed for 8-column rows (current IBJA layout with Platinum)", async () => {
+      const { generateRSSFeed } = require("../../api/_rssUtils");
+      const row = (date, g999) => `
+                <tr>
+                  <td>${date}</td>
+                  <td>${g999}</td>
+                  <td>150445</td>
+                  <td>138362</td>
+                  <td>113228</td>
+                  <td>88364</td>
+                  <td>227650</td>
+                  <td>61251</td>
+                </tr>`;
+      mockedAxios.get.mockResolvedValue({
+        data: `
+          <html>
+            <body>
+              <div id="tab-am">
+                <table><tbody>${row("15/09/2026", "151050")}</tbody></table>
+              </div>
+              <div id="tab-pm">
+                <table><tbody>${row("15/09/2026", "150902")}</tbody></table>
+              </div>
+            </body>
+          </html>
+        `,
+      });
+
+      await indexHandler(req, res);
+      // The mocked rate limiter invokes the RSS handler without awaiting
+      // it, so flush pending promises before asserting on its output.
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(generateRSSFeed).toHaveBeenCalled();
+      const items = generateRSSFeed.mock.calls[0][2];
+      expect(items).toHaveLength(2);
+    });
+
     it("should handle RSS feed with month filter", async () => {
       req.url = "/latest/rss?m=2024-01";
 

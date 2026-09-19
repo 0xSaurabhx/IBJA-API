@@ -160,6 +160,61 @@ describe("Silver API Handler", () => {
       );
     });
 
+    it("should fallback to 8-column history table rows (current IBJA layout with Platinum)", async () => {
+      const mockHtmlResponse = `
+        <html>
+          <body>
+            <span id="lblSilver999_AM"></span>
+            <span id="lblSilver999_PM"></span>
+            <div id="tab-am">
+              <table>
+                <tbody>
+                  <tr>
+                    <td>15/09/2026</td>
+                    <td>151050</td>
+                    <td>150445</td>
+                    <td>138362</td>
+                    <td>113228</td>
+                    <td>88364</td>
+                    <td>227650</td>
+                    <td>61251</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div id="tab-pm">
+              <table>
+                <tbody>
+                  <tr>
+                    <td>15/09/2026</td>
+                    <td>150902</td>
+                    <td>150298</td>
+                    <td>138226</td>
+                    <td>113177</td>
+                    <td>88278</td>
+                    <td>228741</td>
+                    <td>61251</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </body>
+        </html>
+      `;
+
+      mockedAxios.get.mockResolvedValue({ data: mockHtmlResponse });
+
+      await silverHandler(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          lblSilver999_AM: "227650",
+          lblSilver999_PM: "228741",
+        })
+      );
+    });
+
     it("should return 404 when no silver rates found", async () => {
       const mockEmptyHtmlResponse = `
         <html>
@@ -245,6 +300,47 @@ describe("Silver API Handler", () => {
 
       // Check that the RSS route was hit
       expect(mockedAxios.get).toHaveBeenCalledWith("https://www.ibjarates.com");
+    });
+
+    it("should return RSS feed for 8-column rows (current IBJA layout with Platinum)", async () => {
+      const { generateRSSFeed } = require("../../api/_rssUtils");
+      const mockHtmlResponse = `
+        <html>
+          <body>
+            <div id="tab-am">
+              <table>
+                <tbody>
+                  <tr>
+                    <td>15/09/2026</td>
+                    <td>151050</td>
+                    <td>150445</td>
+                    <td>138362</td>
+                    <td>113228</td>
+                    <td>88364</td>
+                    <td>227650</td>
+                    <td>61251</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div id="tab-pm">
+              <table><tbody></tbody></table>
+            </div>
+          </body>
+        </html>
+      `;
+
+      mockedAxios.get.mockResolvedValue({ data: mockHtmlResponse });
+
+      await silverHandler(req, res);
+      // The mocked rate limiter invokes the RSS handler without awaiting
+      // it, so flush pending promises before asserting on its output.
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(generateRSSFeed).toHaveBeenCalled();
+      const items = generateRSSFeed.mock.calls[0][2];
+      expect(items).toHaveLength(1);
     });
 
     it("should return 404 when no silver rates available for RSS", async () => {
